@@ -1,0 +1,191 @@
+/* 全站唯一樣式表。顏色只能使用 :root 變數（CLAUDE.md 第 10 節） */
+:root {
+  --bg: #ffffff;
+  --surface: #f5f7fa;
+  --surface-2: #eceff4;
+  --text: #1b2430;
+  --muted: #5a6573;
+  --border: #dde2e8;
+  --accent: #0f766e;
+  --accent-soft: #e0f2f0;
+  --accent-2: #c2410c;
+  --accent-3: #4f46e5;
+  --warn: #b45309;
+  --warn-soft: #fff4e5;
+  --good: #15803d;
+  --bad: #b91c1c;
+  --code-bg: #f1f3f6;
+  --radius: 10px;
+  --max: 820px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e1116;
+    --surface: #161b22;
+    --surface-2: #1f2630;
+    --text: #e4e8ee;
+    --muted: #98a2b0;
+    --border: #2a323d;
+    --accent: #2dd4bf;
+    --accent-soft: #11302d;
+    --accent-2: #fb923c;
+    --accent-3: #a5b4fc;
+    --warn: #f0b35a;
+    --warn-soft: #2b2112;
+    --good: #4ade80;
+    --bad: #f87171;
+    --code-bg: #1a2029;
+  }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+  font-size: 17px;
+  line-height: 1.75;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ---------- 版面 ---------- */
+.site-header { background: var(--surface); border-bottom: 1px solid var(--border); }
+.site-header .inner, main, .site-footer .inner { max-width: var(--max); margin: 0 auto; padding: 0 16px; }
+.site-header .inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; min-height: 56px; }
+.brand { font-weight: 700; color: var(--text); }
+.site-nav a { margin-left: 16px; color: var(--muted); }
+.site-nav a:first-child { margin-left: 0; }
+.site-nav a[aria-current="page"] { color: var(--accent); font-weight: 600; }
+
+main { padding-top: 32px; padding-bottom: 56px; }
+.site-footer { border-top: 1px solid var(--border); color: var(--muted); font-size: 14px; padding: 20px 0; }
+
+h1 { font-size: 1.85rem; line-height: 1.35; margin: 0 0 4px; }
+h2 { font-size: 1.3rem; margin: 44px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+h3 { font-size: 1.08rem; margin: 22px 0 8px; }
+.lead { color: var(--muted); margin: 0 0 18px; }
+.subtitle { color: var(--muted); margin: 0 0 14px; font-size: 15px; letter-spacing: .02em; }
+
+/* ---------- 首頁 ---------- */
+.hero { padding: 8px 0 12px; }
+.stats { display: flex; flex-wrap: wrap; gap: 12px; margin: 18px 0 26px; }
+.stat { flex: 1 1 140px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
+.stat b { display: block; font-size: 1.5rem; color: var(--accent); line-height: 1.2; }
+.stat span { color: var(--muted); font-size: 14px; }
+
+.chip-filter { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 22px; }
+.chip-filter button {
+  font: inherit; font-size: 14px; padding: 4px 12px; cursor: pointer;
+  border: 1px solid var(--border); border-radius: 999px; background: var(--bg); color: var(--muted);
+}
+.chip-filter button.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+
+.method-grid { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.method-card a {
+  display: flex; flex-direction: column; height: 100%;
+  padding: 16px 18px; border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); color: var(--text); transition: border-color .15s, transform .15s;
+}
+.method-card a:hover { border-color: var(--accent); text-decoration: none; transform: translateY(-2px); }
+.method-card .abbr { font-size: 1.45rem; font-weight: 800; color: var(--accent); line-height: 1.2; }
+.method-card h3 { margin: 2px 0 6px; font-size: 1.02rem; }
+.method-card p { margin: 0 0 12px; color: var(--muted); font-size: 15px; flex: 1; }
+.empty { color: var(--muted); }
+
+/* ---------- 標籤與等級 ---------- */
+.tag { display: inline-block; font-size: 13px; padding: 1px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); margin: 0 4px 4px 0; }
+.tag.cat { background: var(--surface-2); color: var(--text); }
+.level { display: inline-block; min-width: 2.2em; text-align: center; font-size: 13px; font-weight: 700; padding: 1px 8px; border-radius: 6px; background: var(--surface-2); }
+.level[data-level="高"] { color: var(--good); }
+.level[data-level="中"] { color: var(--warn); }
+.level[data-level="低"] { color: var(--bad); }
+
+/* ---------- 方法頁頁首 ---------- */
+.method-header { margin-bottom: 8px; }
+#method-meta { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; margin-top: 8px; }
+#method-meta .meta-item small { display: block; color: var(--muted); font-size: 13px; }
+
+/* ---------- 內容元件 ---------- */
+.key-points { list-style: none; padding: 0; }
+.key-points li { position: relative; padding: 8px 12px 8px 36px; margin-bottom: 8px; background: var(--surface); border-radius: var(--radius); }
+.key-points li::before { content: "✓"; position: absolute; left: 12px; color: var(--accent); font-weight: 700; }
+
+.callout { border-left: 4px solid var(--accent); background: var(--accent-soft); padding: 12px 16px; border-radius: 0 var(--radius) var(--radius) 0; margin: 16px 0; }
+.callout.warn { border-left-color: var(--warn); background: var(--warn-soft); }
+.callout p { margin: 0; }
+
+.formula {
+  font-family: "Cambria Math", "Times New Roman", serif; font-size: 1.15rem;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 12px 16px; margin: 16px 0 4px; overflow-x: auto; white-space: nowrap; text-align: center;
+}
+.formula-note { color: var(--muted); font-size: 14px; margin: 0 0 14px; }
+
+.flow { list-style: none; padding: 0; margin: 16px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.flow li { background: var(--surface); border: 1px solid var(--accent); border-radius: 8px; padding: 6px 12px; font-size: 15px; }
+.flow li + li::before { content: "→"; color: var(--accent); font-weight: 700; margin: 0 8px 0 -2px; }
+.flow li + li { border-left-width: 1px; }
+
+.pros-cons { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.pros-cons ul { margin: 0; padding: 12px 14px 12px 34px; border-radius: var(--radius); background: var(--surface); border-top: 3px solid var(--good); }
+.pros-cons ul.cons { border-top-color: var(--bad); }
+.pros-cons ul::before { display: block; font-weight: 700; margin: 0 0 6px -20px; }
+.pros-cons ul.pros::before { content: "優點"; color: var(--good); }
+.pros-cons ul.cons::before { content: "限制"; color: var(--bad); }
+
+.steps { counter-reset: step; list-style: none; padding-left: 0; }
+.steps li { counter-increment: step; position: relative; padding-left: 44px; margin-bottom: 16px; }
+.steps li::before {
+  content: counter(step); position: absolute; left: 0; top: 2px; width: 30px; height: 30px; border-radius: 50%;
+  background: var(--accent); color: var(--bg); font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center;
+}
+.steps strong { display: block; }
+
+.refs { font-size: 15px; color: var(--muted); padding-left: 22px; }
+.refs li { margin-bottom: 8px; }
+
+pre { background: var(--code-bg); padding: 14px 16px; border-radius: var(--radius); overflow-x: auto; font-size: 14px; line-height: 1.6; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+:not(pre) > code { background: var(--code-bg); padding: 1px 6px; border-radius: 4px; font-size: .9em; }
+
+table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.table-wrap { overflow-x: auto; margin: 16px 0; border: 1px solid var(--border); border-radius: var(--radius); }
+th, td { border-bottom: 1px solid var(--border); padding: 9px 12px; text-align: left; vertical-align: top; white-space: nowrap; }
+th { background: var(--surface); font-weight: 600; }
+tr:last-child td { border-bottom: 0; }
+td.wrap { white-space: normal; min-width: 200px; }
+
+/* ---------- 互動元件 ---------- */
+.widget { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); padding: 14px; margin: 14px 0; }
+.widget canvas { display: block; width: 100%; background: var(--bg); border-radius: 8px; border: 1px solid var(--border); }
+.widget .controls { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin: 0 0 12px; }
+.widget label { font-size: 14px; color: var(--muted); display: block; }
+.widget label b { color: var(--text); font-variant-numeric: tabular-nums; }
+.widget input[type="range"] { width: 100%; accent-color: var(--accent); }
+.widget button { font: inherit; font-size: 14px; padding: 4px 14px; border-radius: 8px; border: 1px solid var(--accent); background: var(--bg); color: var(--accent); cursor: pointer; }
+.widget .readout { display: grid; gap: 6px 14px; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); margin-top: 12px; font-size: 14px; font-variant-numeric: tabular-nums; }
+.widget .readout div { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; }
+.widget .readout small { color: var(--muted); display: block; font-size: 12px; }
+.widget .status { margin-top: 10px; font-size: 14px; }
+.widget .status.warn { color: var(--warn); font-weight: 600; }
+
+/* ---------- 上一頁/下一頁 ---------- */
+#method-nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); }
+#method-nav a { flex: 1; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); }
+#method-nav a:hover { border-color: var(--accent); text-decoration: none; }
+#method-nav .next { text-align: right; }
+#method-nav small { display: block; color: var(--muted); }
+
+@media (max-width: 480px) {
+  body { font-size: 16px; }
+  h1 { font-size: 1.5rem; }
+  .formula { font-size: 1rem; }
+  #method-nav { flex-direction: column; }
+  #method-nav .next { text-align: left; }
+}

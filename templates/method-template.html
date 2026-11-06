@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- ① 標題格式：縮寫｜中文名稱｜馬達控制方法圖鑑 -->
+  <title>ABBR｜中文名稱｜馬達控制方法圖鑑</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<!-- ② data-method = 檔名（不含 .html）= data/methods.js 的 slug -->
+<body data-method="slug">
+  <header class="site-header">
+    <div class="inner">
+      <a class="brand" href="../index.html">⚙️ 馬達控制方法圖鑑</a>
+      <nav class="site-nav">
+        <a href="../index.html">方法</a>
+        <a href="../compare.html">比較表</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <header class="method-header">
+      <h1>中文名稱（ABBR）</h1>
+      <p class="subtitle">English Full Name</p>
+      <!-- 由 main.js 依 data/methods.js 自動填入，請保持空白 -->
+      <div id="method-meta"></div>
+    </header>
+
+    <!-- ③ 以下 section 順序與 id 不可更動；demo 為選用 -->
+    <section id="overview">
+      <h2>📌 一句話理解</h2>
+      <p class="lead">用一段白話說明這個方法在做什麼。</p>
+      <ul class="key-points">
+        <li>重點一</li>
+        <li>重點二</li>
+        <li>重點三</li>
+      </ul>
+    </section>
+
+    <section id="principle">
+      <h2>🧠 控制原理</h2>
+      <p>第一段。</p>
+      <p>第二段。</p>
+      <div class="callout"><p>補充（選用）。</p></div>
+    </section>
+
+    <section id="formula">
+      <h2>📐 關鍵公式</h2>
+      <div class="formula">公式一</div>
+      <p class="formula-note">符號說明。</p>
+      <div class="formula">公式二</div>
+      <p class="formula-note">符號說明。</p>
+    </section>
+
+    <!-- 選用：有互動元件才保留，名稱需在 widgets.js 註冊 -->
+    <section id="demo">
+      <h2>🎛️ 互動模擬</h2>
+      <p>一句操作說明。</p>
+      <div class="widget" data-widget="widget-name"></div>
+    </section>
+
+    <section id="architecture">
+      <h2>🔁 控制架構</h2>
+      <ol class="flow">
+        <li>方塊一</li>
+        <li>方塊二</li>
+        <li>方塊三</li>
+        <li>方塊四</li>
+      </ol>
+      <p>補充說明訊號流向。</p>
+    </section>
+
+    <section id="pros-cons">
+      <h2>⚖️ 優點與限制</h2>
+      <div class="pros-cons">
+        <ul class="pros">
+          <li>優點一</li>
+          <li>優點二</li>
+        </ul>
+        <ul class="cons">
+          <li>限制一</li>
+          <li>限制二</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="dsp">
+      <h2>💻 DSP 實作要點</h2>
+      <ol class="steps">
+        <li><strong>小標</strong>說明。</li>
+        <li><strong>小標</strong>說明。</li>
+        <li><strong>小標</strong>說明。</li>
+      </ol>
+    </section>
+
+    <section id="refs">
+      <h2>📚 參考文獻</h2>
+      <ol class="refs">
+        <li>作者, "題目," 期刊/出版社, 卷(期), 頁碼, 年份.（只列真實可查證的文獻，不確定寫（待補））</li>
+      </ol>
+    </section>
+
+    <nav id="method-nav"></nav>
+  </main>
+
+  <footer class="site-footer">
+    <div class="inner">勤益科大 電機碩一乙 丁國英 · 規則見 CLAUDE.md</div>
+  </footer>
+
+  <script src="../data/methods.js"></script>
+  <script src="../assets/main.js"></script>
+  <script src="../assets/widgets.js"></script>
+</body>
+</html>

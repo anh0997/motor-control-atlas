@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SVPWM｜空間向量脈寬調變｜馬達控制方法圖鑑</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-method="svpwm">
+  <header class="site-header">
+    <div class="inner">
+      <a class="brand" href="../index.html">⚙️ 馬達控制方法圖鑑</a>
+      <nav class="site-nav">
+        <a href="../index.html">方法</a>
+        <a href="../compare.html">比較表</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <header class="method-header">
+      <h1>空間向量脈寬調變（SVPWM）</h1>
+      <p class="subtitle">Space Vector Pulse Width Modulation</p>
+      <div id="method-meta"></div>
+    </header>
+
+    <section id="overview">
+      <h2>📌 一句話理解</h2>
+      <p class="lead">三相變頻器只有 8 種開關組合。SVPWM 把命令電壓看成一個旋轉向量，在每個 PWM 週期內，用相鄰兩個主動向量與零向量按時間比例組合出它。</p>
+      <ul class="key-points">
+        <li>8 種開關狀態 = 6 個主動向量＋2 個零向量，端點構成六邊形。</li>
+        <li>命令向量落在哪個扇區，就用該扇區兩側的向量合成。</li>
+        <li>線性區最大相電壓峰值為 V<sub>dc</sub>/√3，比 SPWM 的 V<sub>dc</sub>/2 高約 15.5%。</li>
+        <li>實作上等效於「弦波＋零序分量注入」，可用 min-max 法簡化計算。</li>
+      </ul>
+    </section>
+
+    <section id="principle">
+      <h2>🧠 控制原理</h2>
+      <p>每個橋臂的狀態以 1（上臂導通）或 0（下臂導通）表示，三相組合 (S<sub>a</sub>S<sub>b</sub>S<sub>c</sub>) 共有 8 種。其中 100、110、010、011、001、101 是六個主動向量 V<sub>1</sub>～V<sub>6</sub>，大小皆為 2V<sub>dc</sub>/3，彼此相差 60°；000 與 111 是零向量 V<sub>0</sub>、V<sub>7</sub>。</p>
+      <p>依「伏秒平衡」，只要在一個 PWM 週期 T<sub>s</sub> 內讓相鄰兩向量各作用一段時間、其餘時間放零向量，平均起來就等於命令向量 V<sub>ref</sub>。以第 1 扇區為例，常用的七段式順序為 000 → 100 → 110 → 111 → 110 → 100 → 000，每次只切換一個橋臂，降低開關損失。</p>
+      <div class="callout"><p>為什麼電壓利用率較高？SPWM 每相各自調變，相電壓峰值上限是 V<sub>dc</sub>/2。SVPWM 等效於在三相同時加入相同的零序電壓：線電壓不變，但相電壓峰值可提高到 V<sub>dc</sub>/√3，為 2/√3 ≈ 1.155 倍。</p></div>
+    </section>
+
+    <section id="formula">
+      <h2>📐 關鍵公式</h2>
+      <div class="formula">V<sub>ref</sub> · T<sub>s</sub> = V<sub>k</sub> · T<sub>1</sub> + V<sub>k+1</sub> · T<sub>2</sub> + V<sub>0</sub> · T<sub>0</sub></div>
+      <p class="formula-note">伏秒平衡；V<sub>k</sub>、V<sub>k+1</sub>：命令向量所在扇區兩側的主動向量。</p>
+      <div class="formula">T<sub>1</sub> = √3 · T<sub>s</sub> · (|V<sub>ref</sub>| / V<sub>dc</sub>) · sin(60° − θ<sub>r</sub>)， &nbsp; T<sub>2</sub> = √3 · T<sub>s</sub> · (|V<sub>ref</sub>| / V<sub>dc</sub>) · sin θ<sub>r</sub>， &nbsp; T<sub>0</sub> = T<sub>s</sub> − T<sub>1</sub> − T<sub>2</sub></div>
+      <p class="formula-note">θ<sub>r</sub>：命令向量在扇區內的角度（0°～60°）；|V<sub>ref</sub>| 為相電壓峰值（振幅不變）。</p>
+      <div class="formula">m = |V<sub>ref</sub>| / (V<sub>dc</sub> / √3) ≤ 1 &nbsp;⇒&nbsp; T<sub>1</sub>/T<sub>s</sub> = m · sin(60° − θ<sub>r</sub>)， T<sub>2</sub>/T<sub>s</sub> = m · sin θ<sub>r</sub></div>
+      <p class="formula-note">調變指數 m = 1 對應六邊形的內切圓（線性區上限）；T<sub>1</sub> + T<sub>2</sub> &gt; T<sub>s</sub> 即為過調變。</p>
+      <div class="formula">v<sub>0</sub> = −[max(v<sub>a</sub>, v<sub>b</sub>, v<sub>c</sub>) + min(v<sub>a</sub>, v<sub>b</sub>, v<sub>c</sub>)] / 2， &nbsp; d<sub>x</sub> = 1/2 + (v<sub>x</sub> + v<sub>0</sub>) / V<sub>dc</sub></div>
+      <p class="formula-note">min-max 零序注入法，結果與置中排列的 SVPWM 相同；d<sub>x</sub>：x 相上臂責任比（x = a, b, c）。</p>
+    </section>
+
+    <section id="demo">
+      <h2>🎛️ 互動模擬</h2>
+      <p>拖動命令電壓的角度與調變指數 m，觀察所在扇區、兩個分量向量（平行四邊形）以及 T<sub>1</sub>、T<sub>2</sub>、T<sub>0</sub>。把 m 拉超過 1，在扇區邊界附近會進入過調變。</p>
+      <div class="widget" data-widget="svpwm-hex"></div>
+    </section>
+
+    <section id="architecture">
+      <h2>🔁 控制架構</h2>
+      <ol class="flow">
+        <li>v<sub>α</sub>*、v<sub>β</sub>*（來自 FOC 或 V/f）</li>
+        <li>計算 |V<sub>ref</sub>| 與角度</li>
+        <li>判斷扇區</li>
+        <li>計算 T<sub>1</sub>、T<sub>2</sub>、T<sub>0</sub></li>
+        <li>七段式排列 → 三相導通時間</li>
+        <li>寫入 PWM 比較暫存器</li>
+        <li>三相橋臂開關</li>
+      </ol>
+      <p>SVPWM 只負責「把電壓命令變成開關訊號」，本身不決定轉速或轉矩，常與 FOC 或 V/f 搭配使用。</p>
+    </section>
+
+    <section id="pros-cons">
+      <h2>⚖️ 優點與限制</h2>
+      <div class="pros-cons">
+        <ul class="pros">
+          <li>直流匯流排電壓利用率比 SPWM 高約 15.5%</li>
+          <li>開關頻率固定，七段式排列每次只切換一個橋臂</li>
+          <li>數位實作直接，適合在 DSP 中執行</li>
+        </ul>
+        <ul class="cons">
+          <li>計算量比 SPWM 大（扇區判斷、三角函數）</li>
+          <li>超過線性區（m &gt; 1）後輸出失真，需另外處理過調變</li>
+          <li>死區時間會造成電壓誤差，低電流時需要補償</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="dsp">
+      <h2>💻 DSP 實作要點</h2>
+      <ol class="steps">
+        <li><strong>中心對齊 PWM</strong>計數器設成上下計數模式，比較值 = 週期值 × 責任比，即可自然形成對稱的七段式波形。</li>
+        <li><strong>用 min-max 法</strong>不必計算角度與扇區，只要三相參考電壓的最大值與最小值就能求出責任比，計算量最小。</li>
+        <li><strong>限制調變指數</strong>若 T<sub>1</sub> + T<sub>2</sub> &gt; T<sub>s</sub>，等比例縮小 T<sub>1</sub>、T<sub>2</sub>，避免比較值超出範圍。</li>
+        <li><strong>死區設定</strong>用 PWM 模組的死區功能設定上下臂延遲，防止直通短路。</li>
+      </ol>
+    </section>
+
+    <section id="refs">
+      <h2>📚 參考文獻</h2>
+      <ol class="refs">
+        <li>H. W. van der Broeck, H.-C. Skudelny, and G. V. Stanke, "Analysis and realization of a pulsewidth modulator based on voltage space vectors," <em>IEEE Transactions on Industry Applications</em>, vol. 24, no. 1, pp. 142–150, 1988.</li>
+        <li>D. G. Holmes and T. A. Lipo, <em>Pulse Width Modulation for Power Converters: Principles and Practice</em>, Hoboken, NJ: Wiley-IEEE Press, 2003.</li>
+      </ol>
+    </section>
+
+    <nav id="method-nav"></nav>
+  </main>
+
+  <footer class="site-footer">
+    <div class="inner">勤益科大 電機碩一乙 丁國英 · 規則見 CLAUDE.md</div>
+  </footer>
+
+  <script src="../data/methods.js"></script>
+  <script src="../assets/main.js"></script>
+  <script src="../assets/widgets.js"></script>
+</body>
+</html>

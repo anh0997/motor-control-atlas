@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>比較表｜馬達控制方法圖鑑</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="inner">
+      <a class="brand" href="index.html">⚙️ 馬達控制方法圖鑑</a>
+      <nav class="site-nav">
+        <a href="index.html">方法</a>
+        <a href="compare.html" aria-current="page">比較表</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <h1>方法比較表</h1>
+    <p class="lead">表格由 <code>data/methods.js</code> 自動產生。等級為相對比較：以 V/f 為低端、FOC 為高端作為參考。</p>
+
+    <div class="widget">
+      <label>依適用馬達篩選：
+        <select id="motor-filter"><option value="">全部</option></select>
+      </label>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>方法</th><th>分類</th><th>動態響應</th><th>低速性能</th><th>實作複雜度</th><th>位置感測</th><th>適用馬達</th><th>一句話</th>
+          </tr>
+        </thead>
+        <tbody id="compare-body"></tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <p>SVPWM 屬於「調變技術」：它負責把控制器算出的電壓命令變成開關訊號，本身不決定轉速或轉矩，所以不評等級。FOC 通常就是搭配 SVPWM 使用。</p>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="inner">勤益科大 電機碩一乙 丁國英 · 規則見 CLAUDE.md</div>
+  </footer>
+
+  <script src="data/methods.js"></script>
+  <script src="assets/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FOC｜磁場導向控制｜馬達控制方法圖鑑</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-method="foc">
+  <header class="site-header">
+    <div class="inner">
+      <a class="brand" href="../index.html">⚙️ 馬達控制方法圖鑑</a>
+      <nav class="site-nav">
+        <a href="../index.html">方法</a>
+        <a href="../compare.html">比較表</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <header class="method-header">
+      <h1>磁場導向控制（FOC）</h1>
+      <p class="subtitle">Field-Oriented Control / Vector Control</p>
+      <div id="method-meta"></div>
+    </header>
+
+    <section id="overview">
+      <h2>📌 一句話理解</h2>
+      <p class="lead">把三相電流轉到跟著轉子磁通一起旋轉的 d-q 座標。在這個座標裡電流變成直流量，就能像他激直流馬達一樣，分開控制磁通與轉矩。</p>
+      <ul class="key-points">
+        <li>Clarke 轉換：三相 abc → 兩相靜止 αβ。</li>
+        <li>Park 轉換：αβ → 隨轉子旋轉的 dq，弦波變成直流量。</li>
+        <li>i<sub>d</sub> 控制磁通、i<sub>q</sub> 控制轉矩，各用一個 PI 控制器。</li>
+        <li>關鍵是要知道準確的電角度 θ<sub>e</sub>。</li>
+      </ul>
+    </section>
+
+    <section id="principle">
+      <h2>🧠 控制原理</h2>
+      <p>直流馬達的磁場與電樞電流天然互相垂直，所以轉矩直接與電樞電流成正比，很好控制。交流馬達的磁場在旋轉、三相電流互相耦合，直接控制很困難。FOC 用座標轉換，把定子電流分解成與轉子磁通同方向的 d 軸分量，以及與它垂直的 q 軸分量。</p>
+      <p>對表面型永磁同步馬達（SPMSM），轉子磁鐵已提供磁通，通常令 i<sub>d</sub>* = 0，轉矩只由 i<sub>q</sub> 決定。內藏型（IPMSM）因 L<sub>d</sub> ≠ L<sub>q</sub>，可配合負的 i<sub>d</sub> 利用磁阻轉矩（MTPA）。感應馬達則需要估算轉子磁通角，例如間接磁場導向利用轉差頻率計算。</p>
+      <p>電流 PI 控制器輸出 v<sub>d</sub>*、v<sub>q</sub>*，經反 Park 轉換回到 αβ 座標，再交給 SVPWM 產生六個開關的訊號。</p>
+      <div class="callout"><p>在互動模擬中轉動 θ<sub>e</sub>：三相電流一直在變，但 i<sub>d</sub>、i<sub>q</sub> 固定不變。命令與回授都是直流量，PI 控制器就能做到零穩態誤差，這就是 FOC 好用的原因。</p></div>
+    </section>
+
+    <section id="formula">
+      <h2>📐 關鍵公式</h2>
+      <div class="formula">i<sub>α</sub> = i<sub>a</sub>， &nbsp; i<sub>β</sub> = (i<sub>a</sub> + 2 i<sub>b</sub>) / √3</div>
+      <p class="formula-note">Clarke 轉換（振幅不變形式），假設三相平衡 i<sub>a</sub> + i<sub>b</sub> + i<sub>c</sub> = 0，因此只需量測兩相電流。</p>
+      <div class="formula">i<sub>d</sub> = i<sub>α</sub> cos θ<sub>e</sub> + i<sub>β</sub> sin θ<sub>e</sub>， &nbsp; i<sub>q</sub> = −i<sub>α</sub> sin θ<sub>e</sub> + i<sub>β</sub> cos θ<sub>e</sub></div>
+      <p class="formula-note">Park 轉換；θ<sub>e</sub>：電角度 = p · θ<sub>m</sub>（p：極對數，θ<sub>m</sub>：機械角）。</p>
+      <div class="formula">T<sub>e</sub> = (3/2) · p · [ λ<sub>f</sub> i<sub>q</sub> + (L<sub>d</sub> − L<sub>q</sub>) i<sub>d</sub> i<sub>q</sub> ]</div>
+      <p class="formula-note">PMSM 電磁轉矩；λ<sub>f</sub>：永磁磁鏈；第二項為磁阻轉矩。SPMSM 的 L<sub>d</sub> = L<sub>q</sub>，簡化為 T<sub>e</sub> = (3/2) p λ<sub>f</sub> i<sub>q</sub>。</p>
+      <div class="formula">v<sub>d</sub> = R<sub>s</sub> i<sub>d</sub> + L<sub>d</sub> di<sub>d</sub>/dt − ω<sub>e</sub> L<sub>q</sub> i<sub>q</sub>， &nbsp; v<sub>q</sub> = R<sub>s</sub> i<sub>q</sub> + L<sub>q</sub> di<sub>q</sub>/dt + ω<sub>e</sub> (L<sub>d</sub> i<sub>d</sub> + λ<sub>f</sub>)</div>
+      <p class="formula-note">PMSM 的 dq 電壓方程式；含 ω<sub>e</sub> 的項是 d、q 軸之間的耦合，可用前饋補償消除。</p>
+    </section>
+
+    <section id="demo">
+      <h2>🎛️ 互動模擬</h2>
+      <p>拖動電角度 θ<sub>e</sub> 或按「播放」讓座標旋轉；調整電流角 γ 可改變 i<sub>d</sub> 與 i<sub>q</sub> 的比例。左圖是 αβ 平面上的電流向量與 d、q 軸，右圖是三相電流與 i<sub>d</sub>、i<sub>q</sub>（虛線）。</p>
+      <div class="widget" data-widget="park"></div>
+    </section>
+
+    <section id="architecture">
+      <h2>🔁 控制架構</h2>
+      <h3>前向路徑</h3>
+      <ol class="flow">
+        <li>速度命令 ω*</li>
+        <li>速度 PI → i<sub>q</sub>*（i<sub>d</sub>* = 0）</li>
+        <li>d、q 電流 PI</li>
+        <li>反 Park → v<sub>α</sub>*、v<sub>β</sub>*</li>
+        <li>SVPWM</li>
+        <li>三相變頻器</li>
+        <li>PMSM</li>
+      </ol>
+      <h3>回授路徑</h3>
+      <ol class="flow">
+        <li>兩相電流取樣</li>
+        <li>Clarke</li>
+        <li>Park（使用 θ<sub>e</sub>）</li>
+        <li>i<sub>d</sub>、i<sub>q</sub> 回授給電流 PI</li>
+      </ol>
+      <p>編碼器（或觀測器）提供 θ<sub>e</sub> 給 Park／反 Park，並提供轉速 ω 給速度 PI。內層電流迴路快、外層速度迴路慢，是典型的串級控制。</p>
+    </section>
+
+    <section id="pros-cons">
+      <h2>⚖️ 優點與限制</h2>
+      <div class="pros-cons">
+        <ul class="pros">
+          <li>動態響應快，轉矩控制精確</li>
+          <li>有位置感測時，低速甚至零速也能穩定出力</li>
+          <li>搭配 SVPWM 開關頻率固定，電流漣波與噪音小</li>
+        </ul>
+        <ul class="cons">
+          <li>需要準確的轉子角度；感測器增加成本，無感測估測在低速較困難</li>
+          <li>計算量大：座標轉換、多個 PI、SVPWM</li>
+          <li>對馬達參數敏感（如感應馬達的轉子時間常數）</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="dsp">
+      <h2>💻 DSP 實作要點</h2>
+      <ol class="steps">
+        <li><strong>ADC 與 PWM 同步</strong>把電流取樣觸發設在中心對齊 PWM 載波的谷點或峰點，避開開關切換時的雜訊。</li>
+        <li><strong>取得電角度</strong>用 eQEP 等模組讀取編碼器，換算 θ<sub>e</sub> = p·θ<sub>m</sub>；或使用無感測觀測器估測。</li>
+        <li><strong>三角函數</strong>sin、cos 用查表或 IQmath 等定點數學函式庫計算，縮短中斷執行時間。</li>
+        <li><strong>PI 控制器</strong>加入輸出限幅與 anti-windup；電流迴路通常每個 PWM 週期執行一次，速度迴路頻率較低。</li>
+        <li><strong>解耦前饋</strong>加入 −ω<sub>e</sub>L<sub>q</sub>i<sub>q</sub> 與 ω<sub>e</sub>(L<sub>d</sub>i<sub>d</sub> + λ<sub>f</sub>) 補償，改善高速時的 d、q 軸耦合。</li>
+      </ol>
+      <pre><code>// 每個 PWM 中斷（電流迴路）
+read ia, ib                      // ADC
+(ialpha, ibeta) = clarke(ia, ib)
+(id, iq)       = park(ialpha, ibeta, theta_e)
+vd = PI_d(id_ref - id) - we*Lq*iq
+vq = PI_q(iq_ref - iq) + we*(Ld*id + lambda_f)
+(valpha, vbeta) = inv_park(vd, vq, theta_e)
+svpwm(valpha, vbeta, Vdc)        // 寫入比較暫存器</code></pre>
+    </section>
+
+    <section id="refs">
+      <h2>📚 參考文獻</h2>
+      <ol class="refs">
+        <li>F. Blaschke, "The principle of field orientation as applied to the new TRANSVEKTOR closed-loop control system for rotating-field machines," <em>Siemens Review</em>, vol. 34, pp. 217–220, 1972.</li>
+        <li>B. K. Bose, <em>Modern Power Electronics and AC Drives</em>, Upper Saddle River, NJ: Prentice Hall, 2002.</li>
+      </ol>
+    </section>
+
+    <nav id="method-nav"></nav>
+  </main>
+
+  <footer class="site-footer">
+    <div class="inner">勤益科大 電機碩一乙 丁國英 · 規則見 CLAUDE.md</div>
+  </footer>
+
+  <script src="../data/methods.js"></script>
+  <script src="../assets/main.js"></script>
+  <script src="../assets/widgets.js"></script>
+</body>
+</html>

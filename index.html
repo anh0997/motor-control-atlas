@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>馬達控制方法圖鑑</title>
+  <meta name="description" content="V/f、FOC、DTC、SVPWM 等馬達控制方法整理與互動模擬">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="inner">
+      <a class="brand" href="index.html">⚙️ 馬達控制方法圖鑑</a>
+      <nav class="site-nav">
+        <a href="index.html" aria-current="page">方法</a>
+        <a href="compare.html">比較表</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>一種方法一頁，看懂馬達怎麼被控制</h1>
+      <p class="lead">從最簡單的 V/f 到 FOC、DTC，再到產生 PWM 的 SVPWM。每一頁都有相同結構：原理、公式、互動模擬、控制架構、優缺點與 DSP 實作要點。</p>
+    </section>
+
+    <div class="stats">
+      <div class="stat"><b id="stat-methods">0</b><span>收錄方法</span></div>
+      <div class="stat"><b id="stat-cats">0</b><span>分類</span></div>
+      <div class="stat"><b id="stat-widgets">0</b><span>互動模擬</span></div>
+    </div>
+
+    <!-- 卡片由 assets/main.js 依 data/methods.js 自動產生，請勿手動新增 -->
+    <div id="cat-filter" class="chip-filter"></div>
+    <ul id="method-grid" class="method-grid"></ul>
+
+    <h2>建議閱讀順序</h2>
+    <ol class="flow">
+      <li>V/f：先理解磁通與頻率</li>
+      <li>SVPWM：電壓怎麼產生</li>
+      <li>FOC：座標轉換與電流迴路</li>
+      <li>DTC：另一種高動態思路</li>
+    </ol>
+    <p>想快速比較各方法的特性，請看 <a href="compare.html">比較表</a>。</p>
+  </main>
+
+  <footer class="site-footer">
+    <div class="inner">勤益科大 電機碩一乙 丁國英 · 規則見 CLAUDE.md</div>
+  </footer>
+
+  <script src="data/methods.js"></script>
+  <script src="assets/main.js"></script>
+</body>
+</html>

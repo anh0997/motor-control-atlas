@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DTC｜直接轉矩控制｜馬達控制方法圖鑑</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body data-method="dtc">
+  <header class="site-header">
+    <div class="inner">
+      <a class="brand" href="../index.html">⚙️ 馬達控制方法圖鑑</a>
+      <nav class="site-nav">
+        <a href="../index.html">方法</a>
+        <a href="../compare.html">比較表</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <header class="method-header">
+      <h1>直接轉矩控制（DTC）</h1>
+      <p class="subtitle">Direct Torque Control</p>
+      <div id="method-meta"></div>
+    </header>
+
+    <section id="overview">
+      <h2>📌 一句話理解</h2>
+      <p class="lead">不用電流 PI、也不用 PWM 調變器。每個取樣週期估算轉矩與定子磁通，看它們偏離命令多少，直接從開關表挑出下一個電壓向量。</p>
+      <ul class="key-points">
+        <li>控制對象是轉矩 T<sub>e</sub> 與定子磁通 |ψ<sub>s</sub>|，而不是電流。</li>
+        <li>兩個遲滯比較器加上磁通所在扇區，就能查表決定開關狀態。</li>
+        <li>轉矩響應非常快，不需要 Park 轉換與位置感測器。</li>
+        <li>代價是轉矩漣波較大、開關頻率不固定。</li>
+      </ul>
+    </section>
+
+    <section id="principle">
+      <h2>🧠 控制原理</h2>
+      <p>定子磁通是電壓的積分。忽略定子電阻時，施加某個電壓向量，磁通向量就沿著該向量的方向移動。選擇不同方向的電壓向量，就能讓磁通「變大或變小」，同時讓磁通「加速或減速旋轉」。磁通轉得比轉子快，兩者夾角變大，轉矩上升；反之轉矩下降。</p>
+      <p>三相變頻器有 6 個主動向量與 2 個零向量。把磁通平面分成 6 個扇區（第 k 扇區以 V<sub>k</sub> 為中心、範圍 ±30°），再根據磁通誤差與轉矩誤差查下表，就能決定輸出向量。此方法由 Takahashi 與 Noguchi 於 1986 年提出。</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>磁通誤差</th><th>轉矩需增加</th><th>轉矩需減少</th></tr></thead>
+          <tbody>
+            <tr><td>磁通需增加</td><td>V<sub>k+1</sub></td><td>V<sub>k−1</sub></td></tr>
+            <tr><td>磁通需減少</td><td>V<sub>k+2</sub></td><td>V<sub>k−2</sub></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>轉矩誤差在遲滯帶內（維持）時輸出零向量 V<sub>0</sub>／V<sub>7</sub>。下標以 6 為循環，例如 k = 6 時 V<sub>k+1</sub> = V<sub>1</sub>。</p>
+      <div class="callout warn"><p>低速時施加的電壓很小，定子電阻壓降相對變大；若 R<sub>s</sub> 不準，磁通估測就會出錯。純積分也會因量測的直流偏移而漂移，這是 DTC 低速性能較差的主因。</p></div>
+    </section>
+
+    <section id="formula">
+      <h2>📐 關鍵公式</h2>
+      <div class="formula">ψ<sub>sα</sub> = ∫ (v<sub>α</sub> − R<sub>s</sub> i<sub>α</sub>) dt， &nbsp; ψ<sub>sβ</sub> = ∫ (v<sub>β</sub> − R<sub>s</sub> i<sub>β</sub>) dt</div>
+      <p class="formula-note">定子磁通估測（電壓模型），只需要定子電阻 R<sub>s</sub> 一個馬達參數。</p>
+      <div class="formula">|ψ<sub>s</sub>| = √(ψ<sub>sα</sub>² + ψ<sub>sβ</sub>²)， &nbsp; θ<sub>ψ</sub> = atan2(ψ<sub>sβ</sub>, ψ<sub>sα</sub>)</div>
+      <p class="formula-note">磁通大小與角度；θ<sub>ψ</sub> 用來判斷目前所在扇區。</p>
+      <div class="formula">T<sub>e</sub> = (3/2) · p · (ψ<sub>sα</sub> i<sub>β</sub> − ψ<sub>sβ</sub> i<sub>α</sub>)</div>
+      <p class="formula-note">轉矩估測；p：極對數。</p>
+      <div class="formula">Δψ<sub>s</sub> ≈ V<sub>k</sub> · Δt</div>
+      <p class="formula-note">忽略 R<sub>s</sub> 時，一個取樣週期 Δt 內磁通向量沿所選電壓向量 V<sub>k</sub> 方向移動，是開關表的依據。</p>
+    </section>
+
+    <section id="architecture">
+      <h2>🔁 控制架構</h2>
+      <h3>前向路徑</h3>
+      <ol class="flow">
+        <li>轉矩命令 T<sub>e</sub>*、磁通命令 |ψ<sub>s</sub>|*</li>
+        <li>轉矩遲滯比較器（三階）</li>
+        <li>磁通遲滯比較器（二階）</li>
+        <li>開關表</li>
+        <li>三相變頻器</li>
+        <li>馬達</li>
+      </ol>
+      <h3>回授路徑</h3>
+      <ol class="flow">
+        <li>相電流取樣＋直流電壓</li>
+        <li>由開關狀態重建 v<sub>α</sub>、v<sub>β</sub></li>
+        <li>磁通與轉矩估測</li>
+        <li>扇區判斷 → 開關表</li>
+      </ol>
+      <p>若需要速度控制，可在外層加一個速度 PI，輸出作為轉矩命令 T<sub>e</sub>*。</p>
+    </section>
+
+    <section id="pros-cons">
+      <h2>⚖️ 優點與限制</h2>
+      <div class="pros-cons">
+        <ul class="pros">
+          <li>轉矩響應極快</li>
+          <li>結構簡單：沒有電流 PI、Park 轉換與 PWM 調變器</li>
+          <li>只需 R<sub>s</sub> 一個參數，不需位置感測器</li>
+        </ul>
+        <ul class="cons">
+          <li>轉矩與磁通漣波較大</li>
+          <li>開關頻率不固定，隨轉速與負載變化，噪音頻譜分散</li>
+          <li>低速時磁通估測受 R<sub>s</sub> 誤差與積分漂移影響</li>
+          <li>需要很高的取樣頻率才能縮小遲滯帶</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="dsp">
+      <h2>💻 DSP 實作要點</h2>
+      <ol class="steps">
+        <li><strong>高取樣頻率</strong>每個取樣週期最多改變一次開關狀態，取樣越快漣波越小，因此 DTC 的取樣頻率通常遠高於 FOC 的電流迴路。</li>
+        <li><strong>電壓重建</strong>用直流匯流排電壓 V<sub>dc</sub> 與目前開關狀態計算 v<sub>α</sub>、v<sub>β</sub>，省去相電壓感測器。</li>
+        <li><strong>避免積分漂移</strong>以低通濾波器近似純積分，或加入直流偏移補償，避免磁通估測逐漸偏離。</li>
+        <li><strong>直接設定開關</strong>開關表結果直接設定六個開關的狀態（例如用 PWM 模組的強制輸出功能），仍需保留死區時間防止上下臂直通。</li>
+      </ol>
+    </section>
+
+    <section id="refs">
+      <h2>📚 參考文獻</h2>
+      <ol class="refs">
+        <li>I. Takahashi and T. Noguchi, "A new quick-response and high-efficiency control strategy of an induction motor," <em>IEEE Transactions on Industry Applications</em>, vol. IA-22, no. 5, pp. 820–827, 1986.</li>
+        <li>M. Depenbrock, "Direct self-control (DSC) of inverter-fed induction machine," <em>IEEE Transactions on Power Electronics</em>, vol. 3, no. 4, pp. 420–429, 1988.</li>
+      </ol>
+    </section>
+
+    <nav id="method-nav"></nav>
+  </main>
+
+  <footer class="site-footer">
+    <div class="inner">勤益科大 電機碩一乙 丁國英 · 規則見 CLAUDE.md</div>
+  </footer>
+
+  <script src="../data/methods.js"></script>
+  <script src="../assets/main.js"></script>
+  <script src="../assets/widgets.js"></script>
+</body>
+</html>
